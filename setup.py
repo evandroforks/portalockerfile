@@ -5,5 +5,5 @@ try:
     import sublime_api
 
 except ImportError:
-    from installer.setup import install
-    install()
+    import setuptools
+    setuptools.setup()

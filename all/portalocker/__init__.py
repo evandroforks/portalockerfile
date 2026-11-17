@@ -60,7 +60,7 @@ LockFlags = constants.LockFlags
 #: Locking utility class to automatically handle opening with timeouts and
 #: context wrappers
 
-__all__ = [
+__all__ = [  # noqa: RUF022 - Preserve the upstream grouping of public exports.
     'lock',
     'unlock',
     'LOCK_EX',

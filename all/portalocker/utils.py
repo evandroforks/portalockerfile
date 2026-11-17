@@ -89,8 +89,9 @@ def open_atomic(
     # Create the parent directory if it doesn't exist
     path.parent.mkdir(parents=True, exist_ok=True)
 
-    temp_fh = tempfile.NamedTemporaryFile(
-        mode=binary and 'wb' or 'w',
+    # The handle must close before the Windows rename below.
+    temp_fh = tempfile.NamedTemporaryFile(  # noqa: SIM115
+        mode='wb' if binary else 'w',
         dir=str(path.parent),
         delete=False,
     )
@@ -310,7 +311,7 @@ class Lock(LockBase):
 
     def _get_fh(self) -> typing.IO:
         '''Get a new filehandle'''
-        return open(  # noqa: SIM115
+        return open(
             self.filename,
             self.mode,
             **self.file_open_kwargs,
@@ -557,7 +558,7 @@ class NamedBoundedSemaphore(BoundedSemaphore):
         fail_when_locked: typing.Optional[bool] = True,
     ):
         if name is None:
-            name = 'bounded_semaphore.%d' % random.randint(0, 1000000)
+            name = f'bounded_semaphore.{random.randint(0, 1000000)}'
         super().__init__(
             maximum,
             name,

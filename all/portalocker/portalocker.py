@@ -12,8 +12,9 @@ class HasFileno(typing.Protocol):
     def fileno(self) -> int: ...
 
 
-LOCKER: typing.Optional[typing.Callable[
-    [typing.Union[int, HasFileno], int], typing.Any]] = None
+LOCKER: typing.Optional[
+    typing.Callable[[typing.Union[int, HasFileno], int], typing.Any]
+] = None
 
 
 if os.name == 'nt':  # pragma: no cover

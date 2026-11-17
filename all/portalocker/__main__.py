@@ -1,6 +1,5 @@
 import argparse
 import logging
-import os
 import pathlib
 import re
 import shutil
@@ -116,7 +115,7 @@ def combine(args):
     logger.info(f'Wrote combined file to {output_file.name}')
     # Run black and ruff if available. If not then just run the file.
     startupinfo = None
-    if os.name == 'nt':
+    if sys.platform == 'win32':  # pragma: no cover
         startupinfo = subprocess.STARTUPINFO()
         startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
         startupinfo.wShowWindow = 7
@@ -129,7 +128,7 @@ def combine(args):
         if executable:
             subprocess.run(
                 [executable, *command[1:]],
-                check=True,
+                check=False,
                 startupinfo=startupinfo,
             )
     subprocess.run(

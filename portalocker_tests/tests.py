@@ -296,96 +296,111 @@ def lock(
     filename: str,
     fail_when_locked: bool,
     flags: LockFlags,
-    timeout=0.1,
-    keep_locked=0.05,
-) -> LockResult:
-    # Returns a case of True, False or FileNotFound
-    # https://thedailywtf.com/articles/what_is_truth_0x3f_
-    # But seriously, the exception properties cannot be safely pickled so we
-    # only return string representations of the exception properties
+    result_queue,
+    release,
+    locker=None,
+) -> None:
+    portalocker.portalocker.LOCKER = locker
+    instance = portalocker.Lock(
+        filename,
+        timeout=0.1,
+        fail_when_locked=fail_when_locked,
+        flags=flags,
+    )
     try:
-        with portalocker.Lock(
-            filename,
-            timeout=timeout,
-            fail_when_locked=fail_when_locked,
-            flags=flags,
-        ):
-            time.sleep(keep_locked)
-            return LockResult()
-
+        instance.acquire()
     except Exception as exception:
-        # The exceptions cannot be pickled so we cannot return them through
-        # multiprocessing
-        return LockResult(
-            type(exception),
-            str(exception),
-            repr(exception),
+        # Exception instances may contain unpicklable handles.
+        result_queue.put(
+            LockResult(type(exception), str(exception), repr(exception)),
         )
+        return
+    result_queue.put(LockResult())
+    try:
+        if not release.wait(timeout=30):
+            raise TimeoutError('The test did not release its held lock')
+    finally:
+        instance.release()
 
 
 @pytest.mark.parametrize('fail_when_locked', [True, False])
+@pytest.mark.timeout(60)
 def test_shared_processes(tmpfile, fail_when_locked):
     flags = LockFlags.SHARED | LockFlags.NON_BLOCKING
-    print()
-    print(f'{fail_when_locked=}, {flags=}, {os.name=}, {LOCKERS=}')
-
-    with multiprocessing.Pool(processes=2) as pool:
-        args = tmpfile, fail_when_locked, flags
-        results = pool.starmap_async(lock, 2 * [args])
-
-        # sourcery skip: no-loop-in-tests
-        for result in results.get(timeout=1.0):
-            print(f'{result=}')
-            # sourcery skip: no-conditionals-in-tests
-            if result.exception_class is not None:
-                raise result.exception_class
-            assert result == LockResult()
+    context = multiprocessing.get_context('spawn')
+    release = context.Event()
+    results = [context.Queue(), context.Queue()]
+    workers = [
+        context.Process(
+            target=lock,
+            args=(
+                tmpfile,
+                fail_when_locked,
+                flags,
+                results[index],
+                release,
+            ),
+        )
+        for index in range(2)
+    ]
+    try:
+        workers[0].start()
+        assert results[0].get(timeout=10) == LockResult()
+        workers[1].start()
+        assert results[1].get(timeout=10) == LockResult()
+        assert workers[0].is_alive()
+        assert not release.is_set()
+        release.set()
+    finally:
+        release.set()
+        for worker in workers:
+            if worker.pid is not None:
+                worker.join(timeout=10)
+                assert worker.exitcode == 0
+        for result in results:
+            result.close()
 
 
 @pytest.mark.parametrize('fail_when_locked', [True, False])
 @pytest.mark.parametrize('locker', LOCKERS, indirect=True)
+@pytest.mark.timeout(60)
 def test_exclusive_processes(tmpfile: str, fail_when_locked: bool, locker):
     flags = LockFlags.EXCLUSIVE | LockFlags.NON_BLOCKING
-
-    print('Locking', tmpfile, fail_when_locked, locker)
-    with multiprocessing.Pool(processes=2) as pool:
-        # Submit tasks individually
-        result_a = pool.apply_async(lock, [tmpfile, fail_when_locked, flags])
-        result_b = pool.apply_async(lock, [tmpfile, fail_when_locked, flags])
-
-        try:
-            a = result_a.get(timeout=1.1)  # Wait for 'a' with timeout
-        except multiprocessing.TimeoutError:
-            a = None
-
-        try:
-            # Lower timeout since we already waited with `a`
-            b = result_b.get(timeout=0.2)  # Wait for 'b' with timeout
-        except multiprocessing.TimeoutError:
-            b = None
-
-        assert a or b
-        # Make sure a is always filled
-        if b:
-            b, a = b, a
-
-        print(f'{a=}')
-        print(f'{b=}')
-
-        # make pyright happy
-        assert a is not None
-
-        if b:
-            # make pyright happy
-            assert b is not None
-
-            assert not a.exception_class or not b.exception_class
-            assert issubclass(
-                a.exception_class or b.exception_class,  # type: ignore
-                portalocker.LockException,
-            )
-        else:
-            assert not a.exception_class
+    context = multiprocessing.get_context('spawn')
+    release = context.Event()
+    results = [context.Queue(), context.Queue()]
+    workers = [
+        context.Process(
+            target=lock,
+            args=(
+                tmpfile,
+                fail_when_locked,
+                flags,
+                results[index],
+                release,
+                locker,
+            ),
+        )
+        for index in range(2)
+    ]
+    try:
+        workers[0].start()
+        assert results[0].get(timeout=10) == LockResult()
+        workers[1].start()
+        blocked = results[1].get(timeout=10)
+        assert blocked.exception_class is not None
+        assert issubclass(blocked.exception_class, portalocker.LockException)
+        assert workers[0].is_alive()
+        assert not release.is_set()
+        release.set()
+    finally:
+        release.set()
+        for worker in workers:
+            if worker.pid is not None:
+                worker.join(timeout=10)
+                assert worker.exitcode == 0
+        for result in results:
+            result.close()
 
 
 @pytest.mark.skipif(

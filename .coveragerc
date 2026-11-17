@@ -13,9 +13,9 @@ exclude_lines =
     typing.Protocol
 
 omit =
-    portalocker/redis.py
+    all/portalocker/redis.py
 
 [run]
-source = src
+source = portalocker
 branch = True
 
