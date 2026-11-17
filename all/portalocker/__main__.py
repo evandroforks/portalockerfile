@@ -39,8 +39,8 @@ def main(argv=None):
     combine_parser.add_argument(
         '--output-file',
         '-o',
-        type=argparse.FileType('w'),
-        default=str(_default_output_path),
+        type=pathlib.Path,
+        default=_default_output_path,
     )
 
     combine_parser.set_defaults(func=combine)
@@ -95,24 +95,21 @@ def _clean_line(line, names):
 
 
 def combine(args):
-    output_file = args.output_file
-    pathlib.Path(output_file.name).parent.mkdir(parents=True, exist_ok=True)
+    output_path = args.output_file
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    with output_path.open('w') as output_file:
+        output_file.write(
+            _TEXT_TEMPLATE.format((base_path / 'README.rst').read_text()),
+        )
+        output_file.write(
+            _TEXT_TEMPLATE.format((base_path / 'LICENSE').read_text()),
+        )
 
-    output_file.write(
-        _TEXT_TEMPLATE.format((base_path / 'README.rst').read_text()),
-    )
-    output_file.write(
-        _TEXT_TEMPLATE.format((base_path / 'LICENSE').read_text()),
-    )
+        seen_files: typing.Set[pathlib.Path] = set()
+        for line in _read_file(src_path / '__init__.py', seen_files):
+            output_file.write(line)
 
-    seen_files: typing.Set[pathlib.Path] = set()
-    for line in _read_file(src_path / '__init__.py', seen_files):
-        output_file.write(line)
-
-    output_file.flush()
-    output_file.close()
-
-    logger.info(f'Wrote combined file to {output_file.name}')
+    logger.info(f'Wrote combined file to {output_path}')
     # Run black and ruff if available. If not then just run the file.
     startupinfo = None
     if sys.platform == 'win32':  # pragma: no cover
@@ -121,8 +118,8 @@ def combine(args):
         startupinfo.wShowWindow = 7
 
     for command in (
-        ('black', output_file.name),
-        ('ruff', 'check', '--fix', output_file.name),
+        ('black', str(output_path)),
+        ('ruff', 'check', '--fix', str(output_path)),
     ):
         executable = shutil.which(command[0])
         if executable:
@@ -132,7 +129,7 @@ def combine(args):
                 startupinfo=startupinfo,
             )
     subprocess.run(
-        [sys.executable, output_file.name],
+        [sys.executable, str(output_path)],
         check=True,
         startupinfo=startupinfo,
     )

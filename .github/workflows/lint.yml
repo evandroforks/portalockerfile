@@ -10,6 +10,9 @@ env:
 jobs:
   lint:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
     strategy:
       fail-fast: false
       matrix:
@@ -23,24 +26,28 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: 'pip'
       - name: Python version
-        run: python --version
+        run: |
+          set -Eeuo pipefail
+          python --version
 
       - name: Install dependencies
         run: |
+          set -Eeuo pipefail
           python -m pip install --upgrade pip setuptools wheel mypy
           python -m pip install -e '.[tests]'
 
       - name: Linting with pyright
         uses: jakebailey/pyright-action@v1
         with:
-          path: portalocker portalocker_tests
+          path: all/portalocker portalocker_tests
 
       - name: Linting with ruff
         uses: jpetrucciani/ruff-check@main
         with:
-          extra-args: portalocker portalocker_tests
+          extra-args: all/portalocker portalocker_tests
 
       - name: Linting with mypy
         run: |
-          python -m mypy portalocker portalocker_tests
+          set -Eeuo pipefail
+          python -m mypy all/portalocker portalocker_tests
 

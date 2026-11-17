@@ -2,6 +2,7 @@ import importlib.util
 import os
 import subprocess
 import sys
+from pathlib import Path
 
 import pytest
 
@@ -9,14 +10,15 @@ from portalocker import __main__
 
 
 @pytest.mark.parametrize('tools_available', [False, True])
-def test_combined(tmpdir, monkeypatch, tools_available):
+@pytest.mark.parametrize('default_output', [False, True])
+def test_combined(tmpdir, monkeypatch, tools_available, default_output):
     real_run = subprocess.run
     calls = []
 
     def invoke(command, **kwargs):
         calls.append(command)
         assert kwargs['check'] is (command[0] == sys.executable)
-        if os.name == 'nt':
+        if sys.platform == 'win32':
             assert kwargs['startupinfo'].wShowWindow == 7
             assert (
                 kwargs['startupinfo'].dwFlags & subprocess.STARTF_USESHOWWINDOW
@@ -32,8 +34,21 @@ def test_combined(tmpdir, monkeypatch, tools_available):
 
     monkeypatch.setattr(__main__.shutil, 'which', resolve_tool)
     monkeypatch.setattr(__main__.subprocess, 'run', invoke)
-    output_file = tmpdir.mkdir('folder with spaces').join('combined.py')
-    __main__.main(['combine', '--output-file', output_file.strpath])
+    output_file = tmpdir.join(
+        'folder with spaces',
+        'new parent',
+        'combined.py',
+    )
+    assert not output_file.dirpath().exists()
+    if default_output:
+        monkeypatch.setattr(
+            __main__,
+            '_default_output_path',
+            Path(output_file.strpath),
+        )
+        __main__.main(['combine'])
+    else:
+        __main__.main(['combine', '--output-file', output_file.strpath])
     expected = [[sys.executable, output_file.strpath]]
     if tools_available:
         expected[:0] = [
