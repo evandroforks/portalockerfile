@@ -1,4 +1,4 @@
-__package_name__ = 'portalocker'
+__package_name__ = 'portalockerfile'
 __author__ = 'Rick van Hattem'
 __email__ = 'wolph@wol.ph'
 __version__ = '2.10.1'

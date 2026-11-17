@@ -3,7 +3,7 @@ build-backend = 'setuptools.build_meta'
 requires = ['setuptools', 'setuptools-scm']
 
 [project]
-name = 'portalocker'
+name = 'portalockerfile'
 dynamic = ['version']
 authors = [{name = 'Rick van Hattem', email = 'wolph@wol.ph'}]
 license = {text = 'BSD-3-Clause'}
@@ -83,6 +83,7 @@ include-package-data = false
 version = { attr = 'portalocker.__about__.__version__' }
 
 [tool.setuptools.packages.find]
+where = ['all']
 include = ['portalocker']
 
 [tool.setuptools.package-data]
@@ -96,5 +97,6 @@ skip-string-normalization = true
 skip = '*/htmlcov,./docs/_build,*.asc'
 
 [tool.pyright]
-include = ['portalocker', 'portalocker_tests']
+include = ['all/portalocker', 'portalocker_tests']
+extraPaths = ['all']
 exclude = ['dist/*']

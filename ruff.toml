@@ -3,7 +3,7 @@
 
 target-version = 'py38'
 
-src = ['portalocker']
+src = ['all/portalocker']
 exclude = ['docs']
 
 line-length = 80

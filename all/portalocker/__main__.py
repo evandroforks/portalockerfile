@@ -3,10 +3,13 @@ import logging
 import os
 import pathlib
 import re
+import shutil
+import subprocess
+import sys
 import typing
 
-base_path = pathlib.Path(__file__).parent.parent
-src_path = base_path / 'portalocker'
+base_path = pathlib.Path(__file__).resolve().parents[2]
+src_path = pathlib.Path(__file__).resolve().parent
 dist_path = base_path / 'dist'
 _default_output_path = base_path / 'dist' / 'portalocker.py'
 
@@ -112,9 +115,28 @@ def combine(args):
 
     logger.info(f'Wrote combined file to {output_file.name}')
     # Run black and ruff if available. If not then just run the file.
-    os.system(f'black {output_file.name}')
-    os.system(f'ruff --fix {output_file.name}')
-    os.system(f'python3 {output_file.name}')
+    startupinfo = None
+    if os.name == 'nt':
+        startupinfo = subprocess.STARTUPINFO()
+        startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+        startupinfo.wShowWindow = 7
+
+    for command in (
+        ('black', output_file.name),
+        ('ruff', 'check', '--fix', output_file.name),
+    ):
+        executable = shutil.which(command[0])
+        if executable:
+            subprocess.run(
+                [executable, *command[1:]],
+                check=True,
+                startupinfo=startupinfo,
+            )
+    subprocess.run(
+        [sys.executable, output_file.name],
+        check=True,
+        startupinfo=startupinfo,
+    )
 
 
 if __name__ == '__main__':

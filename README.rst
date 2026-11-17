@@ -4,11 +4,7 @@ portalocker - Cross-platform locking library
 
 .. image:: https://github.com/WoLpH/portalocker/actions/workflows/python-package.yml/badge.svg?branch=master
     :alt: Linux Test Status
-<<<<<<< HEAD
     :target: https://github.com/WoLpH/portalocker/actions/
-=======
-    :target: https://travis-ci.org/WoLpH/portalocker
->>>>>>> maintenance/portalocker-py38
 
 .. image:: https://ci.appveyor.com/api/projects/status/mgqry98hgpy4prhh?svg=true
     :alt: Windows Tests Status

@@ -1,9 +1,6 @@
 include CHANGELOG.rst
 include README.rst
 include LICENSE
-<<<<<<< HEAD
 recursive-include portalocker_tests *.py
-=======
 recursive-include all/portalocker *.py
-recursive-include tests *.py
->>>>>>> maintenance/portalocker-py38
+recursive-include all/portalocker py.typed
