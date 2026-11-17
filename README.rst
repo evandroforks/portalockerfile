@@ -4,7 +4,11 @@ portalocker - Cross-platform locking library
 
 .. image:: https://github.com/WoLpH/portalocker/actions/workflows/python-package.yml/badge.svg?branch=master
     :alt: Linux Test Status
+<<<<<<< HEAD
     :target: https://github.com/WoLpH/portalocker/actions/
+=======
+    :target: https://travis-ci.org/WoLpH/portalocker
+>>>>>>> maintenance/portalocker-py38
 
 .. image:: https://ci.appveyor.com/api/projects/status/mgqry98hgpy4prhh?svg=true
     :alt: Windows Tests Status
@@ -13,6 +17,24 @@ portalocker - Cross-platform locking library
 .. image:: https://coveralls.io/repos/WoLpH/portalocker/badge.svg?branch=master
     :alt: Coverage Status
     :target: https://coveralls.io/r/WoLpH/portalocker?branch=master
+
+Usage
+--------
+
+.. code:: javascript
+
+    pip install portalocker
+
+
+Or clone this repository locally by running the commands:
+
+.. code:: javascript
+
+    git clone https://github.com/evandrocoan/portalockerfile
+    cd portalockerfile
+
+Then ``python setup.py install`` or ``python setup.py develop`` to install it on development mode.
+
 
 Overview
 --------
@@ -190,4 +212,27 @@ License
 -------
 
 See the `LICENSE <https://github.com/WoLpH/portalocker/blob/develop/LICENSE>`_ file.
+
+
+Sublime Text Dependency
+-------
+
+To use this as a Package Control Dependency https://packagecontrol.io/docs/dependencies create
+this ``dependencies.json`` file on the root of your Package:
+
+.. code:: javascript
+
+    {
+        "windows": {
+            ">3000": [
+                "python-pywin32",
+                "portalockerfile"
+            ]
+        },
+        "*": {
+            "*": [
+                "portalockerfile"
+            ]
+        }
+    }
 

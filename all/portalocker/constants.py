@@ -46,6 +46,7 @@ elif os.name == 'posix':  # pragma: no cover
 
 else:  # pragma: no cover
     raise RuntimeError('PortaLocker only defined for nt and posix platforms')
+<<<<<<< HEAD:portalocker/constants.py
 
 
 class LockFlags(enum.IntFlag):
@@ -57,3 +58,5 @@ class LockFlags(enum.IntFlag):
     NON_BLOCKING = LOCK_NB
     #: unlock
     UNBLOCK = LOCK_UN
+=======
+>>>>>>> maintenance/portalocker-py38:all/portalocker/constants.py
