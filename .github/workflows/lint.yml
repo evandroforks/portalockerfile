@@ -9,7 +9,7 @@ env:
 
 jobs:
   lint:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     defaults:
       run:
         shell: bash
@@ -44,7 +44,7 @@ jobs:
       - name: Linting with ruff
         uses: jpetrucciani/ruff-check@main
         with:
-          extra-args: all/portalocker portalocker_tests
+          path: all/portalocker portalocker_tests
 
       - name: Linting with mypy
         run: |
