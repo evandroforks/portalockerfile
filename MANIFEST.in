@@ -1,5 +1,6 @@
-include CHANGELOG
+include CHANGELOG.rst
 include README.rst
 include LICENSE
+recursive-include portalocker_tests *.py
 recursive-include all/portalocker *.py
-recursive-include tests *.py
+recursive-include all/portalocker py.typed

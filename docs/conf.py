@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # Documentation build configuration file, created by
 # sphinx-quickstart on Thu Feb 27 20:00:23 2014.
@@ -19,7 +18,7 @@ import datetime
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(__file__)), 'all'))
 
 from portalocker import __about__ as metadata
 
@@ -40,6 +39,7 @@ extensions = [
     'sphinx.ext.mathjax',
     'sphinx.ext.ifconfig',
     'sphinx.ext.viewcode',
+    'sphinx.ext.napoleon',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -56,7 +56,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = metadata.__package_name__.replace('-', ' ').capitalize()
-copyright = u'%s,  <a href="http://wol.ph/">%s</a>' % (
+copyright = '{},  <a href="http://wol.ph/">{}</a>'.format(
     datetime.date.today().year,
     metadata.__author__,
 )
@@ -86,7 +86,7 @@ exclude_patterns = ['_build']
 
 # The reST default role (used for this markup: `text`) to use for all
 # documents.
-#default_role = None
+default_role = 'py:obj'
 
 # If true, '()' will be appended to :func: etc. cross-reference text.
 #add_function_parentheses = True
@@ -196,7 +196,7 @@ htmlhelp_basename = metadata.__package_name__ + '-doc'
 
 # -- Options for LaTeX output ---------------------------------------------
 
-latex_elements = {
+# latex_elements = {
 # The paper size ('letterpaper' or 'a4paper').
 #'papersize': 'letterpaper',
 
@@ -205,14 +205,14 @@ latex_elements = {
 
 # Additional stuff for the LaTeX preamble.
 #'preamble': '',
-}
+# }
 
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [(
     'index',
     '%s.tex' % metadata.__package_name__,
-    u'%s Documentation' % metadata.__package_name__.replace('-', ' ').capitalize(),
+    '%s Documentation' % metadata.__package_name__.replace('-', ' ').capitalize(),
    metadata.__author__,
    'manual',
 )]
@@ -245,7 +245,7 @@ latex_documents = [(
 man_pages = [(
     'index',
     metadata.__package_name__,
-    u'%s Documentation' % metadata.__package_name__.replace('-', ' ').capitalize(),
+    '%s Documentation' % metadata.__package_name__.replace('-', ' ').capitalize(),
     [metadata.__author__],
     1,
 )]
@@ -262,7 +262,7 @@ man_pages = [(
 texinfo_documents = [(
     'index',
     metadata.__package_name__,
-    u'%s Documentation' % metadata.__package_name__.replace('-', ' ').capitalize(),
+    '%s Documentation' % metadata.__package_name__.replace('-', ' ').capitalize(),
     metadata.__author__,
     metadata.__package_name__,
     metadata.__description__,
@@ -320,7 +320,7 @@ epub_copyright = copyright
 # The format is a list of tuples containing the path and title.
 #epub_pre_files = []
 
-# HTML files shat should be inserted after the pages created by sphinx.
+# HTML files that should be inserted after the pages created by sphinx.
 # The format is a list of tuples containing the path and title.
 #epub_post_files = []
 
@@ -350,4 +350,4 @@ epub_exclude_files = ['search.html']
 
 
 # Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = {'http://docs.python.org/': None}
+intersphinx_mapping = {'http://docs.python.org/3/': None}

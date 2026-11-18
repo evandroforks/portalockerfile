@@ -1,7 +1,6 @@
-__package_name__ = 'portalocker'
+__package_name__ = 'portalockerfile'
 __author__ = 'Rick van Hattem'
 __email__ = 'wolph@wol.ph'
-__version__ = '1.3.0'
+__version__ = '2.10.1'
 __description__ = '''Wraps the portalocker recipe for easy usage'''
 __url__ = 'https://github.com/WoLpH/portalocker'
-

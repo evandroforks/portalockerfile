@@ -1,0 +1,53 @@
+name: lint
+
+on:
+  push:
+  pull_request:
+
+env:
+  FORCE_COLOR: 1
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.8', '3.8', '3.10', '3.11']
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip'
+      - name: Python version
+        run: |
+          set -Eeuo pipefail
+          python --version
+
+      - name: Install dependencies
+        run: |
+          set -Eeuo pipefail
+          python -m pip install --upgrade pip setuptools wheel mypy
+          python -m pip install -e '.[tests]'
+
+      - name: Linting with pyright
+        uses: jakebailey/pyright-action@v1
+        with:
+          path: all/portalocker portalocker_tests
+
+      - name: Linting with ruff
+        uses: jpetrucciani/ruff-check@main
+        with:
+          extra-args: all/portalocker portalocker_tests
+
+      - name: Linting with mypy
+        run: |
+          set -Eeuo pipefail
+          python -m mypy all/portalocker portalocker_tests
+

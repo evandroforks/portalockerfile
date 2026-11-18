@@ -1,19 +1,27 @@
-class BaseLockException(Exception):
+import typing
+
+
+class BaseLockException(Exception):  # noqa: N818
     # Error codes:
     LOCK_FAILED = 1
 
-    def __init__(self, *args, **kwargs):
-        self.fh = kwargs.pop('fh', None)
-        Exception.__init__(self, *args, **kwargs)
+    def __init__(
+        self,
+        *args: typing.Any,
+        fh: typing.Union[typing.IO, int, None] = None,
+        **kwargs: typing.Any,
+    ) -> None:
+        self.fh = fh
+        Exception.__init__(self, *args)
 
 
 class LockException(BaseLockException):
     pass
 
 
-class AlreadyLocked(BaseLockException):
+class AlreadyLocked(LockException):
     pass
 
 
-class FileToLarge(BaseLockException):
+class FileToLarge(LockException):
     pass

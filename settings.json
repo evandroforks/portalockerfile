@@ -1,4 +1,7 @@
 {
+    "python_versions": [
+        "3.8"
+    ],
     "tags": [
         {
             "ref": "st-build-3999",
