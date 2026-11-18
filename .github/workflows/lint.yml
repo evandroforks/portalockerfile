@@ -50,4 +50,3 @@ jobs:
         run: |
           set -Eeuo pipefail
           python -m mypy all/portalocker portalocker_tests
-
