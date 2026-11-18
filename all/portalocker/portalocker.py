@@ -20,7 +20,31 @@ LOCKER: typing.Optional[
 if os.name == 'nt':  # pragma: no cover
     import msvcrt
 
-    import pywintypes
+    try:
+        import pywintypes
+    except ModuleNotFoundError as exc:
+        import site
+        import sys
+
+        sublime = sys.modules.get('sublime')
+        if (
+            exc.name != 'pywintypes'
+            or sys.version_info[:2] != (3, 8)
+            or sublime is None
+            or int(sublime.version()) >= 4205
+        ):
+            raise
+
+        # Sublime builds before 4205 do not process Lib/*.pth files.
+        site.addsitedir(
+            os.path.join(
+                os.path.dirname(sublime.packages_path()),
+                'Lib',
+                'python38',
+            ),
+        )
+        import pywintypes
+
     import win32con
     import win32file
     import winerror
